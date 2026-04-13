@@ -215,3 +215,29 @@ sudo bash deploy/install-server.sh \
 - 执行 `node scripts/sync-posts.mjs`
 - 注册并启动 systemd 服务
 - 可选配置 Nginx 反向代理
+
+### CentOS 说明
+
+如果你的服务器是 CentOS，这份安装脚本已经按 CentOS 场景补过：
+
+- 自动识别 `dnf` 或 `yum`
+- 使用 NodeSource 安装 Node.js 20
+- Nginx 配置写入 `/etc/nginx/conf.d/`
+- 如果启用了 SELinux，会自动执行 `setsebool -P httpd_can_network_connect 1`
+- 如果启用了 `firewalld`，会自动放行 `http`
+
+CentOS 上推荐直接执行：
+
+```bash
+sudo bash deploy/install-server.sh \
+  --repo-url https://github.com/PolataMai/signal-forge-blog.git \
+  --branch main \
+  --domain your-domain.com \
+  --admin-password 'your-admin-password'
+```
+
+安装完成后，后台入口通常是：
+
+```text
+http://your-domain.com/admin.html
+```

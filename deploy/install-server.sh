@@ -10,6 +10,167 @@ ADMIN_PASSWORD=""
 SESSION_SECRET=""
 PORT="3000"
 INSTALL_NGINX="true"
+PKG_MANAGER=""
+
+require_root() {
+  if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
+    echo "Please run this script with sudo or as root." >&2
+    exit 1
+  fi
+}
+
+detect_pkg_manager() {
+  if command -v dnf >/dev/null 2>&1; then
+    PKG_MANAGER="dnf"
+    return
+  fi
+
+  if command -v yum >/dev/null 2>&1; then
+    PKG_MANAGER="yum"
+    return
+  fi
+
+  if command -v apt-get >/dev/null 2>&1; then
+    PKG_MANAGER="apt-get"
+    return
+  fi
+
+  echo "Unsupported package manager. Expected dnf, yum, or apt-get." >&2
+  exit 1
+}
+
+pkg_update() {
+  case "$PKG_MANAGER" in
+    dnf)
+      dnf -y makecache
+      ;;
+    yum)
+      yum -y makecache
+      ;;
+    apt-get)
+      apt-get update
+      ;;
+  esac
+}
+
+pkg_install() {
+  case "$PKG_MANAGER" in
+    dnf)
+      dnf install -y "$@"
+      ;;
+    yum)
+      yum install -y "$@"
+      ;;
+    apt-get)
+      apt-get install -y "$@"
+      ;;
+  esac
+}
+
+ensure_base_packages() {
+  pkg_update
+
+  case "$PKG_MANAGER" in
+    dnf)
+      pkg_install git curl openssl ca-certificates
+      ;;
+    yum)
+      pkg_install epel-release || true
+      pkg_install git curl openssl ca-certificates
+      ;;
+    apt-get)
+      pkg_install git curl openssl ca-certificates
+      ;;
+  esac
+}
+
+node_major_version() {
+  if ! command -v node >/dev/null 2>&1; then
+    echo "0"
+    return
+  fi
+
+  node -p "process.versions.node.split('.')[0]"
+}
+
+install_nodejs() {
+  local major_version
+  major_version="$(node_major_version)"
+
+  if [[ "$major_version" -ge 18 ]]; then
+    return
+  fi
+
+  case "$PKG_MANAGER" in
+    dnf|yum)
+      curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+      pkg_install nodejs
+      ;;
+    apt-get)
+      curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+      pkg_install nodejs
+      ;;
+  esac
+}
+
+install_nginx() {
+  if command -v nginx >/dev/null 2>&1; then
+    systemctl enable --now nginx
+    return
+  fi
+
+  case "$PKG_MANAGER" in
+    dnf)
+      pkg_install nginx
+      ;;
+    yum)
+      pkg_install nginx
+      ;;
+    apt-get)
+      pkg_install nginx
+      ;;
+  esac
+
+  systemctl enable --now nginx
+}
+
+configure_selinux() {
+  if ! command -v getenforce >/dev/null 2>&1; then
+    return
+  fi
+
+  if [[ "$(getenforce)" == "Disabled" ]]; then
+    return
+  fi
+
+  if ! command -v setsebool >/dev/null 2>&1; then
+    case "$PKG_MANAGER" in
+      dnf)
+        pkg_install policycoreutils-python-utils
+        ;;
+      yum)
+        pkg_install policycoreutils-python || true
+        ;;
+    esac
+  fi
+
+  if command -v setsebool >/dev/null 2>&1; then
+    setsebool -P httpd_can_network_connect 1 || true
+  fi
+}
+
+configure_firewalld() {
+  if ! command -v firewall-cmd >/dev/null 2>&1; then
+    return
+  fi
+
+  if ! systemctl is-active --quiet firewalld; then
+    return
+  fi
+
+  firewall-cmd --permanent --add-service=http || true
+  firewall-cmd --reload || true
+}
 
 usage() {
   cat <<'EOF'
@@ -79,29 +240,24 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+require_root
+detect_pkg_manager
+
 if [[ -z "$REPO_URL" || -z "$ADMIN_PASSWORD" ]]; then
   echo "Missing required arguments." >&2
   usage
   exit 1
 fi
 
+ensure_base_packages
+install_nodejs
+
 if [[ -z "$SESSION_SECRET" ]]; then
   SESSION_SECRET="$(openssl rand -hex 32)"
 fi
 
-if ! command -v git >/dev/null 2>&1; then
-  apt-get update
-  apt-get install -y git
-fi
-
-if ! command -v node >/dev/null 2>&1; then
-  apt-get update
-  apt-get install -y nodejs npm
-fi
-
-if [[ "$INSTALL_NGINX" == "true" ]] && ! command -v nginx >/dev/null 2>&1; then
-  apt-get update
-  apt-get install -y nginx
+if [[ "$INSTALL_NGINX" == "true" ]]; then
+  install_nginx
 fi
 
 mkdir -p "$(dirname "$APP_DIR")"
@@ -120,6 +276,8 @@ BLOG_ADMIN_PASSWORD=$ADMIN_PASSWORD
 BLOG_SESSION_SECRET=$SESSION_SECRET
 BLOG_SECURE_COOKIE=true
 EOF
+
+chmod 600 "$APP_DIR/.env"
 
 cd "$APP_DIR"
 node scripts/sync-posts.mjs
@@ -146,7 +304,7 @@ systemctl daemon-reload
 systemctl enable --now "${SERVICE_NAME}.service"
 
 if [[ "$INSTALL_NGINX" == "true" && -n "$DOMAIN" ]]; then
-  cat > "/etc/nginx/sites-available/${SERVICE_NAME}.conf" <<EOF
+  cat > "/etc/nginx/conf.d/${SERVICE_NAME}.conf" <<EOF
 server {
     listen 80;
     server_name $DOMAIN;
@@ -162,7 +320,8 @@ server {
 }
 EOF
 
-  ln -sf "/etc/nginx/sites-available/${SERVICE_NAME}.conf" "/etc/nginx/sites-enabled/${SERVICE_NAME}.conf"
+  configure_selinux
+  configure_firewalld
   nginx -t
   systemctl reload nginx
 fi
