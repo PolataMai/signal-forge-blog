@@ -198,6 +198,40 @@ node scripts/sync-posts.mjs
 - `deploy/install-server.sh`
 - `deploy/signal-forge.service.example`
 
+## 分支规范
+
+从现在开始按下面这套标准执行：
+
+- `dev`：日常开发分支，所有功能和修复先进入这里
+- `main`：发布分支，服务器只部署这个分支
+
+规则：
+
+1. 平时开发只在 `dev` 上进行。
+2. 需要上线时，从 `dev` 发布到 `main`。
+3. 如果出现线上热修直接进了 `main`，要马上把 `main` 同步回 `dev`。
+
+仓库里已经准备了两个脚本：
+
+```bash
+bash scripts/release-dev-to-main.sh
+bash scripts/sync-dev-from-main.sh
+```
+
+含义：
+
+- `release-dev-to-main.sh`：把 `dev` 快进发布到 `main`
+- `sync-dev-from-main.sh`：把 `main` 的变更快进同步回 `dev`
+
+建议工作流：
+
+```bash
+git switch dev
+# 开发、提交、推送
+
+bash scripts/release-dev-to-main.sh
+```
+
 服务器上一键安装的典型方式：
 
 ```bash
