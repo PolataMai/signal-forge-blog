@@ -221,10 +221,17 @@ sudo bash deploy/install-server.sh \
 如果你的服务器是 CentOS，这份安装脚本已经按 CentOS 场景补过：
 
 - 自动识别 `dnf` 或 `yum`
-- 使用 NodeSource 安装 Node.js 20
+- 如果系统 `glibc >= 2.28`，使用 NodeSource 安装 Node.js 20
+- 如果系统像 `CentOS 7` 一样仍是 `glibc 2.17`，自动回退到 `Node.js unofficial linux-x64-glibc-217` 二进制
 - Nginx 配置写入 `/etc/nginx/conf.d/`
 - 如果启用了 SELinux，会自动执行 `setsebool -P httpd_can_network_connect 1`
 - 如果启用了 `firewalld`，会自动放行 `http`
+
+说明：
+
+- 你这次报错里显示的是 `glibc-2.17`，这正是 `CentOS 7` 的典型情况。
+- `CentOS Linux 7` 已在 `2024-06-30` 结束生命周期，长期来看仍然建议迁移到 `Rocky Linux 8/9`、`AlmaLinux 8/9` 或其他较新的发行版。
+- `Node.js unofficial builds` 是兼容旧 glibc 的权宜方案，不是官方稳定发布通道。
 
 CentOS 上推荐直接执行：
 

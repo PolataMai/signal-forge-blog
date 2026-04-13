@@ -11,6 +11,8 @@ SESSION_SECRET=""
 PORT="3000"
 INSTALL_NGINX="true"
 PKG_MANAGER=""
+NODE_VERSION="v20.20.2"
+NODE_UNOFFICIAL_BASE_URL="https://unofficial-builds.nodejs.org/download/release"
 
 require_root() {
   if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
@@ -67,6 +69,17 @@ pkg_install() {
   esac
 }
 
+version_lt() {
+  local left="$1"
+  local right="$2"
+
+  if [[ "$left" == "$right" ]]; then
+    return 1
+  fi
+
+  [[ "$(printf '%s\n%s\n' "$left" "$right" | sort -V | head -n 1)" == "$left" ]]
+}
+
 ensure_base_packages() {
   pkg_update
 
@@ -93,11 +106,65 @@ node_major_version() {
   node -p "process.versions.node.split('.')[0]"
 }
 
+glibc_version() {
+  if command -v getconf >/dev/null 2>&1; then
+    getconf GNU_LIBC_VERSION | awk '{print $2}'
+    return
+  fi
+
+  ldd --version | head -n 1 | grep -oE '[0-9]+\.[0-9]+' | head -n 1
+}
+
+install_nodejs_unofficial_glibc217() {
+  local arch
+  local node_dir
+  local tarball
+  local download_url
+
+  arch="$(uname -m)"
+  if [[ "$arch" != "x86_64" ]]; then
+    echo "CentOS 7 fallback currently supports only x86_64. Current arch: $arch" >&2
+    exit 1
+  fi
+
+  pkg_install xz
+
+  node_dir="/usr/local/lib/nodejs/node-${NODE_VERSION}-linux-x64-glibc-217"
+  tarball="/tmp/node-${NODE_VERSION}-linux-x64-glibc-217.tar.xz"
+  download_url="${NODE_UNOFFICIAL_BASE_URL}/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64-glibc-217.tar.xz"
+
+  mkdir -p /usr/local/lib/nodejs
+  rm -rf "$node_dir"
+  curl -fsSL "$download_url" -o "$tarball"
+  tar -xJf "$tarball" -C /usr/local/lib/nodejs
+
+  ln -sfn "${node_dir}/bin/node" /usr/local/bin/node
+  ln -sfn "${node_dir}/bin/npm" /usr/local/bin/npm
+  ln -sfn "${node_dir}/bin/npx" /usr/local/bin/npx
+
+  if [[ -x "${node_dir}/bin/corepack" ]]; then
+    ln -sfn "${node_dir}/bin/corepack" /usr/local/bin/corepack
+  fi
+
+  echo "Installed Node.js ${NODE_VERSION} from unofficial glibc-217 build for CentOS 7 compatibility."
+}
+
 install_nodejs() {
   local major_version
+  local glibc_ver
   major_version="$(node_major_version)"
 
   if [[ "$major_version" -ge 18 ]]; then
+    return
+  fi
+
+  glibc_ver="$(glibc_version)"
+
+  if version_lt "$glibc_ver" "2.28"; then
+    echo "Detected glibc ${glibc_ver}. NodeSource Node 20 requires glibc >= 2.28." >&2
+    echo "Falling back to Node.js ${NODE_VERSION} unofficial linux-x64-glibc-217 build." >&2
+    echo "Warning: this fallback is experimental. CentOS Linux 7 reached EOL on June 30, 2024." >&2
+    install_nodejs_unofficial_glibc217
     return
   fi
 
