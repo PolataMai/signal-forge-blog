@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signal Forge | 个人知识博客</title>
+    <meta
+      name="description"
+      content="一座面向 Codex 实战、Skill 创作和部署方法论的个人知识博客，记录可复用的学习成果。"
+    />
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <script src="./assets/app.js" defer></script>
+  </head>
+  <body data-page="home" data-root="./">
+    <div class="progress-line" data-progress></div>
+    <div class="cursor-spotlight" aria-hidden="true"></div>
+    <div class="backdrop-grid" aria-hidden="true"></div>
+    <div data-site-nav></div>
+
+    <main>
+      <section class="section hero">
+        <div class="shell hero-grid">
+          <div class="hero-copy" data-reveal>
+            <p class="eyebrow">Signal Forge / Personal Knowledge Reactor</p>
+            <h1 class="display">
+              把零散学习记录，
+              <span>锻造成可复用的个人操作系统。</span>
+            </h1>
+            <p class="lead">
+              这里不是传统时间流博客，而是一座持续升级的知识锻造台。
+              我会把 Codex 使用技巧、Skill 创作经验、部署流程和工具链方案，
+              沉淀成能立即拿来落地的实践条目。
+            </p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="#library">阅读最新内容</a>
+              <a class="button button-secondary" href="#deploy">部署这套博客</a>
+            </div>
+            <div class="hero-badges">
+              <span>Static First</span>
+              <span>Server Ready</span>
+              <span>Smooth Motion</span>
+              <span>Knowledge Driven</span>
+            </div>
+          </div>
+
+          <div class="hero-panel panel-card" data-reveal data-tilt>
+            <div class="panel-head">
+              <span class="panel-label">Live Console</span>
+              <span class="panel-status">Online</span>
+            </div>
+            <div class="orbit-stack" aria-hidden="true">
+              <span class="orbit-ring orbit-ring-a"></span>
+              <span class="orbit-ring orbit-ring-b"></span>
+              <span class="orbit-core"></span>
+            </div>
+            <div class="metric-grid">
+              <article>
+                <strong>03</strong>
+                <span>知识主线</span>
+              </article>
+              <article>
+                <strong>100%</strong>
+                <span>可静态部署</span>
+              </article>
+              <article>
+                <strong>0</strong>
+                <span>构建依赖</span>
+              </article>
+              <article>
+                <strong>Fast</strong>
+                <span>首屏路径短</span>
+              </article>
+            </div>
+            <div class="terminal-window">
+              <div class="terminal-line">
+                <span class="terminal-prompt">$</span>
+                <span>学习输入 -> 提炼 -> 模板化 -> 发布</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-prompt">$</span>
+                <span>codex / skill / deploy / workflow / archive</span>
+              </div>
+              <div class="terminal-line active">
+                <span class="terminal-prompt">$</span>
+                <span>next article queued: figma 与 design-to-code 工作流</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="shell">
+          <div class="section-head" data-reveal>
+            <p class="section-kicker">Knowledge Channels</p>
+            <h2>把博客做成学习系统，而不是文章堆。</h2>
+            <p>
+              首页按照“实战、封装、部署”三条线路组织内容。每一条都可以独立扩展，
+              既适合自己复盘，也适合未来公开分享。
+            </p>
+          </div>
+
+          <div class="feature-grid">
+            <article class="feature-card panel-card" data-reveal data-tilt>
+              <p class="feature-index">01</p>
+              <h3>Codex 实战</h3>
+              <p>
+                记录从读代码、找约束、并行探索，到直接落地修改的高效工作流。
+              </p>
+            </article>
+            <article class="feature-card panel-card" data-reveal data-tilt>
+              <p class="feature-index">02</p>
+              <h3>Skill 工坊</h3>
+              <p>
+                把一次性经验压缩成可复用的 skill，让未来的自己少走回头路。
+              </p>
+            </article>
+            <article class="feature-card panel-card" data-reveal data-tilt>
+              <p class="feature-index">03</p>
+              <h3>部署手册</h3>
+              <p>
+                保持站点零构建依赖，一台服务器即可上线，并且回滚路径清晰。
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="library">
+        <div class="shell">
+          <div class="section-head" data-reveal>
+            <p class="section-kicker">Knowledge Library</p>
+            <h2>最近沉淀的条目</h2>
+            <p>
+              用标签快速切换主题，按关键字搜索文章。这个列表由 Markdown 内容驱动，
+              后续加内容时只要新增一篇 Markdown 并执行同步脚本即可。
+            </p>
+          </div>
+          <div class="chip-row" data-filter-chips data-reveal></div>
+          <div class="post-grid" id="post-grid"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="shell split-layout">
+          <div data-reveal>
+            <p class="section-kicker">Method Flow</p>
+            <h2>从输入知识，到输出资产。</h2>
+            <p class="section-text">
+              我给这类博客定的标准不是“写了多少”，而是“能不能复用”。
+              所以内容会尽量遵循固定流转：问题背景、关键约束、可执行步骤、失败点和模板片段。
+            </p>
+          </div>
+          <div class="timeline" data-reveal>
+            <article class="timeline-item panel-card">
+              <span>Capture</span>
+              <h3>收集碎片</h3>
+              <p>把命令、提示词、异常栈、部署操作先收进一个临时池。</p>
+            </article>
+            <article class="timeline-item panel-card">
+              <span>Distill</span>
+              <h3>抽出模式</h3>
+              <p>提炼哪些做法是可复用的，哪些只是一次性的环境偶然性。</p>
+            </article>
+            <article class="timeline-item panel-card">
+              <span>Forge</span>
+              <h3>封装条目</h3>
+              <p>形成文章、模板、脚本或 skill，确保下一次可以直接拿来用。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="deploy">
+        <div class="shell">
+          <div class="deploy-card panel-card" data-reveal>
+            <div>
+              <p class="section-kicker">Deploy Ready</p>
+              <h2>这套博客可以直接丢到你的服务器上。</h2>
+              <p>
+                站点没有构建步骤，也没有依赖安装。上传整个目录到服务器静态站点根目录，
+                用 Nginx 或 Caddy 指向它即可。
+              </p>
+            </div>
+            <div class="terminal-window">
+              <div class="terminal-line">
+                <span class="terminal-prompt">$</span>
+                <span>scp -r ./person-blog user@your-server:/var/www/signal-forge</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-prompt">$</span>
+                <span>sudo ln -s /etc/nginx/sites-available/signal-forge.conf</span>
+              </div>
+              <div class="terminal-line active">
+                <span class="terminal-prompt">$</span>
+                <span>sudo systemctl reload nginx</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div data-site-footer></div>
+  </body>
+</html>

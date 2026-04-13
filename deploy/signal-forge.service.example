@@ -1,0 +1,15 @@
+[Unit]
+Description=Signal Forge Blog
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/signal-forge
+EnvironmentFile=/opt/signal-forge/.env
+ExecStart=/usr/bin/env node server.mjs
+Restart=always
+RestartSec=3
+User=root
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>发布后台 | Signal Forge</title>
+    <meta
+      name="description"
+      content="Signal Forge 的博客发布后台，可登录后输入 URL 或技术主题生成草稿并发布。"
+    />
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <script src="./assets/app.js" defer></script>
+    <script src="./assets/admin.js" defer></script>
+  </head>
+  <body data-page="admin" data-root="./">
+    <div class="progress-line" data-progress></div>
+    <div class="cursor-spotlight" aria-hidden="true"></div>
+    <div class="backdrop-grid" aria-hidden="true"></div>
+    <div data-site-nav></div>
+
+    <main class="section article-page admin-page">
+      <div class="shell">
+        <section class="section-head" data-reveal>
+          <p class="section-kicker">Admin Console</p>
+          <h1 class="article-title">研究草稿与发布后台</h1>
+          <p class="article-intro">
+            登录后可以输入一个 URL 或技术名词，生成博客草稿，编辑 Markdown，然后直接发布到站点。
+          </p>
+        </section>
+
+        <div class="admin-grid">
+          <section class="panel-card admin-panel" data-auth-panel data-reveal>
+            <div class="panel-head">
+              <span class="panel-label">Access</span>
+              <span class="panel-status" data-auth-state>Checking</span>
+            </div>
+            <div class="status-box status-box-info" data-auth-message>
+              正在检查后台配置与登录状态。
+            </div>
+            <form class="admin-form" data-login-form>
+              <label>
+                <span>后台密码</span>
+                <input type="password" name="password" placeholder="输入 BLOG_ADMIN_PASSWORD" required />
+              </label>
+              <button class="button button-primary" type="submit">登录后台</button>
+            </form>
+          </section>
+
+          <section class="panel-card admin-panel" data-workspace-panel hidden data-reveal>
+            <div class="panel-head">
+              <span class="panel-label">Publisher</span>
+              <div class="admin-head-actions">
+                <span class="panel-status">Authenticated</span>
+                <button class="button button-secondary" type="button" data-logout-button>退出登录</button>
+              </div>
+            </div>
+
+            <div class="admin-workspace">
+              <form class="admin-form" data-draft-form>
+                <div class="form-grid two-columns">
+                  <label>
+                    <span>输入类型</span>
+                    <select name="mode">
+                      <option value="url">URL</option>
+                      <option value="topic">技术名词</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>分类</span>
+                    <input type="text" name="category" value="技术研究" />
+                  </label>
+                </div>
+
+                <label>
+                  <span>URL 或主题</span>
+                  <input
+                    type="text"
+                    name="input"
+                    placeholder="例如 https://platform.openai.com/docs 或 Model Context Protocol"
+                    required
+                  />
+                </label>
+
+                <label>
+                  <span>补充要求</span>
+                  <textarea
+                    name="notes"
+                    rows="4"
+                    placeholder="例如：重点写 quick start、常见坑、与 Codex 的关系"
+                  ></textarea>
+                </label>
+
+                <div class="admin-actions">
+                  <button class="button button-primary" type="submit">生成草稿</button>
+                </div>
+              </form>
+
+              <div class="status-box status-box-info" data-draft-status>
+                生成草稿后，结果会自动填入下面的发布表单。
+              </div>
+
+              <div class="admin-source-list" data-source-list></div>
+
+              <form class="admin-form" data-publish-form>
+                <div class="form-grid two-columns">
+                  <label>
+                    <span>文章标题</span>
+                    <input type="text" name="title" required />
+                  </label>
+                  <label>
+                    <span>Slug</span>
+                    <input type="text" name="slug" placeholder="english-kebab-case" />
+                  </label>
+                </div>
+
+                <label>
+                  <span>摘要</span>
+                  <textarea name="excerpt" rows="3" required></textarea>
+                </label>
+
+                <div class="form-grid three-columns">
+                  <label>
+                    <span>分类</span>
+                    <input type="text" name="category" value="技术研究" />
+                  </label>
+                  <label>
+                    <span>标签</span>
+                    <input type="text" name="tags" placeholder="tag-1, tag-2, tag-3" />
+                  </label>
+                  <label>
+                    <span>色彩</span>
+                    <select name="accent">
+                      <option value="cyan">cyan</option>
+                      <option value="lime">lime</option>
+                      <option value="orange">orange</option>
+                      <option value="rose">rose</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="form-grid three-columns">
+                  <label>
+                    <span>发布日期</span>
+                    <input type="date" name="date" />
+                  </label>
+                  <label>
+                    <span>阅读时长</span>
+                    <input type="text" name="readingTime" placeholder="7 min" />
+                  </label>
+                  <label class="checkbox-row">
+                    <span>置顶展示</span>
+                    <input type="checkbox" name="featured" />
+                  </label>
+                </div>
+
+                <label>
+                  <span>Markdown 正文</span>
+                  <textarea
+                    class="editor-textarea"
+                    name="body"
+                    rows="20"
+                    placeholder="这里会放生成的 Markdown 草稿，你也可以手动编辑。"
+                    required
+                  ></textarea>
+                </label>
+
+                <div class="admin-actions">
+                  <button class="button button-primary" type="submit">发布到博客</button>
+                  <a class="button button-secondary" href="./index.html" target="_blank" rel="noreferrer">
+                    打开首页
+                  </a>
+                </div>
+              </form>
+
+              <div class="status-box status-box-info" data-publish-status>
+                发布成功后，这里会显示文章链接和同步结果。
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <div data-site-footer></div>
+  </body>
+</html>

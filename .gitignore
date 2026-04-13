@@ -1,0 +1,12 @@
+.DS_Store
+.env
+.env.local
+.env.production
+.env.*.local
+.omx/
+*.log
+*.pid
+*.tmp
+*.swp
+node_modules/
+.idea/
