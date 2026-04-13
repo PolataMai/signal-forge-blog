@@ -120,6 +120,8 @@ install_nodejs_unofficial_glibc217() {
   local node_dir
   local tarball
   local download_url
+  local expected_size
+  local actual_size
 
   arch="$(uname -m)"
   if [[ "$arch" != "x86_64" ]]; then
@@ -135,7 +137,17 @@ install_nodejs_unofficial_glibc217() {
 
   mkdir -p /usr/local/lib/nodejs
   rm -rf "$node_dir"
-  curl -fsSL "$download_url" -o "$tarball"
+  expected_size="$(curl -fsSI "$download_url" | awk '/^Content-Length:/ {print $2}' | tr -d '\r')"
+
+  echo "Downloading ${download_url}"
+  curl -fL --retry 5 --retry-delay 2 --retry-all-errors --continue-at - "$download_url" -o "$tarball"
+
+  actual_size="$(wc -c < "$tarball" | tr -d ' ')"
+  if [[ -n "$expected_size" && "$actual_size" != "$expected_size" ]]; then
+    echo "Downloaded file size mismatch: expected ${expected_size}, got ${actual_size}" >&2
+    exit 1
+  fi
+
   tar -xJf "$tarball" -C /usr/local/lib/nodejs
 
   ln -sfn "${node_dir}/bin/node" /usr/local/bin/node
